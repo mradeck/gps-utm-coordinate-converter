@@ -3,6 +3,9 @@
 
   const DEG = Math.PI / 180;
   const ARCSEC = DEG / 3600;
+  const SCRIPT_BASE = typeof document !== 'undefined' && document.currentScript?.src
+    ? new URL('.', document.currentScript.src)
+    : null;
   const ETRS89 = { a: 6378137, invF: 298.257222101 };
   const BESSEL = { a: 6377397.155, invF: 299.1528128 };
   const GCG = {
@@ -14,7 +17,9 @@
     stepLat: -0.00833333333460076,
     noData: 32767,
     scale: 0.01,
-    url: 'data/gcg2016v2023-cm.i16',
+    url: SCRIPT_BASE
+      ? new URL('data/gcg2016v2023-cm.i16?v=2023-web-2', SCRIPT_BASE).href
+      : 'data/gcg2016v2023-cm.i16?v=2023-web-2',
   };
   let geoidPromise = null;
 
@@ -190,7 +195,14 @@
     const y0 = Math.min(Math.floor(y), GCG.height - 2);
     const fx = x - x0;
     const fy = y - y0;
-    const grid = await loadGeoid(url);
+    let grid;
+    try {
+      grid = await loadGeoid(url);
+    } catch (firstError) {
+      if (url) throw firstError;
+      const separator = GCG.url.includes('?') ? '&' : '?';
+      grid = await loadGeoid(`${GCG.url}${separator}retry=${Date.now()}`);
+    }
     const sample = (sx, sy) => grid[sy * GCG.width + sx];
     const q00 = sample(x0, y0), q10 = sample(x0 + 1, y0);
     const q01 = sample(x0, y0 + 1), q11 = sample(x0 + 1, y0 + 1);

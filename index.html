@@ -114,10 +114,10 @@
   </details>
 
   <footer>
-    Koordinaten sind eine Orientierungshilfe, kein Vermessungsnachweis. GCG2016 © GeoBasis-DE / BKG (2026), <a href="https://creativecommons.org/licenses/by/4.0/deed.de" target="_blank" rel="noopener">CC BY 4.0</a>. Bezug: <a href="https://gdz.bkg.bund.de/koordinatentransformation" target="_blank" rel="noopener">BKG Koordinatentransformation</a>. · v0.1
+    Koordinaten sind eine Orientierungshilfe, kein Vermessungsnachweis. GCG2016 © GeoBasis-DE / BKG (2026), <a href="https://creativecommons.org/licenses/by/4.0/deed.de" target="_blank" rel="noopener">CC BY 4.0</a>. Bezug: <a href="https://gdz.bkg.bund.de/koordinatentransformation" target="_blank" rel="noopener">BKG Koordinatentransformation</a>. · v0.2
   </footer>
 </main>
-<script src="coordinate-tools.js"></script>
+<script src="coordinate-tools.js?v=0.2"></script>
 <script>
   'use strict';
   const REF = { lat: 51 + 56 / 60 + 31.768 / 3600, lon: 13 + 53 / 60 + 46.094 / 3600, altitude: 94.04 };
@@ -170,7 +170,10 @@
         $('reference-result').classList.add('hidden');
       }
     } catch (error) {
-      if (seq === renderSequence) $('geoid-height').textContent = 'GCG2016 konnte nicht geladen werden';
+      if (seq === renderSequence) {
+        $('geoid-height').textContent = 'GCG2016 konnte nicht geladen werden – bitte Seite neu laden';
+        $('normal-height').textContent = 'nicht berechenbar';
+      }
     }
   }
 
