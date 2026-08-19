@@ -1,6 +1,6 @@
 {
-  "name": "GPS → UTM Koordinaten",
-  "short_name": "GPS → UTM",
+  "name": "GPS2UTM Koordinaten",
+  "short_name": "GPS2UTM",
   "description": "WGS84/ETRS89-GPS-Koordinaten in UTM, Gauß-Krüger und DHHN2016 umrechnen.",
   "start_url": "./",
   "scope": "./",

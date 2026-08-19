@@ -1,4 +1,4 @@
-const CACHE = 'gps-utm-v2';
+const CACHE = 'gps2utm-26.08.3.0';
 const SHELL = [
   './',
   './index.html',
