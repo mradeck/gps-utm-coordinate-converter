@@ -1,0 +1,19 @@
+{
+  "name": "GPS → UTM Koordinaten",
+  "short_name": "GPS → UTM",
+  "description": "WGS84/ETRS89-GPS-Koordinaten in UTM, Gauß-Krüger und DHHN2016 umrechnen.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07101f",
+  "theme_color": "#07101f",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
