@@ -1,4 +1,4 @@
-const CACHE = 'gps2utm-26.4.1';
+const CACHE = 'gps2utm-26.5.1';
 const SHELL = [
   './',
   './index.html',
@@ -7,6 +7,9 @@ const SHELL = [
   './data/gcg2016v2023-cm.i16',
   './icon.svg',
   './manifest.webmanifest',
+  './vendor/fonts/inter-latin-wght-normal.woff2',
+  './vendor/fonts/inter-latin-ext-wght-normal.woff2',
+  './vendor/fonts/OFL.txt',
 ];
 
 self.addEventListener('install', event => {
