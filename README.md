@@ -1,6 +1,6 @@
 # GPS2UTM Koordinaten
 
-**Aktuelle Version:** v26.08.3.0
+**Aktuelle Version:** v26.11.4.0 (Änderungen: [`CHANGELOG.md`](CHANGELOG.md))
 
 ## Versionierung
 
@@ -8,8 +8,10 @@ GPS2UTM verwendet wie der PointCloud Manager das Anzeigeformat
 `vYY.MM.major.subversion`. Die aktuelle fortlaufende App-Version bildet die
 `major`-Stelle; ein neuer Funktionsstand setzt `subversion` auf `0`, reine
 Hotfixes erhöhen nur die letzte Stelle. Die vollständige Nummer steht zentral
-in `APP_VERSION` und erscheint im Browser-Tab sowie neben der Wortmarke im
-App-Kopf.
+in `APP_VERSION` und erscheint im Browser-Tab, neben der Wortmarke im
+App-Kopf, in der Fußleiste und im Betreff der Kontakt-Mails. Bei jeder neuen
+Version wird auch der Cache-Name in `sw.js` angepasst, damit installierte
+Fassungen die neuen Dateien laden.
 
 Mobile, installierbare Single-Page-App zur direkten Umrechnung des
 Handy-Standorts:
@@ -20,7 +22,9 @@ Handy-Standorts:
 - GCG2016-Geoidundulation und DHHN2016-Normalhöhe
 - eingebauter amtlicher Kontrollpunkt Lübben zur numerischen Prüfung
 - Offlinebetrieb als Progressive Web App
-- direkte Links zu SkyCheck, SkyAlarm und PointCloud Manager sowie zu michael-radeck.de und Ko-fi
+- Oberfläche auf Deutsch und Englisch (Knopf mit Fahne, Wahl wird im Browser gespeichert, beim ersten Aufruf gilt die Browsersprache)
+- Interface automatisch / hell / dunkel (Knopf, Wahl wird im Browser gespeichert; „automatisch“ folgt der Systemeinstellung)
+- zwei Fußleisten: „Weitere Apps“ mit Links zu den übrigen Werkzeugen von Michael Radeck sowie Version, Datenquellen, Quellcode, Hilfe / Bugreport / Kontakt, Lizenzen / Copyright, Impressum und Ko-fi
 
 ## Benutzung
 

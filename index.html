@@ -3,87 +3,137 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#07101f">
+  <meta name="theme-color" content="#14171c">
   <meta name="description" content="GPS2UTM — GPS-Koordinaten direkt in ETRS89 / UTM, Gauß-Krüger und DHHN2016 umrechnen">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <title>GPS2UTM — Koordinaten</title>
+  <script>
+    // Interface-Farbe und Sprache vor dem ersten Zeichnen setzen (kein Aufblitzen).
+    (function () {
+      try {
+        var th = localStorage.getItem('gps2utm.theme');
+        if (th === 'light' || th === 'dark') document.documentElement.setAttribute('data-theme', th);
+        var lg = localStorage.getItem('gps2utm.lang');
+        document.documentElement.lang = lg === 'en' || lg === 'de' ? lg : (/^de\b/i.test(navigator.language || '') ? 'de' : 'en');
+      } catch (e) { /* ohne Speicher: Systemvorgabe */ }
+    })();
+  </script>
   <style>
-    :root { color-scheme: dark; --bg:#07101f; --card:#101f36; --card2:#0c1a2e; --border:#28466d; --text:#e3f1ff; --muted:#8ca6c8; --accent:#00c2e8; --brand-red:#ef4444; --ok:#06d6a0; --warn:#ffb703; }
-    :root.light { color-scheme:light; --bg:#eef4fb; --card:#fff; --card2:#f8fbff; --border:#bfd0e2; --text:#132840; --muted:#526d8a; --accent:#008eaf; --ok:#007e61; --warn:#9a6700; }
+    /* Neutrales Farbschema. Dunkel ist die Grundlage, hell per data-theme oder Systemeinstellung. */
+    :root {
+      color-scheme: dark;
+      --bg:#14171c; --panel:#1d2229; --panel2:#232a33; --border:#333c48;
+      --text:#e6ebf1; --muted:#93a0af; --accent:#4da3ff; --on-accent:#0b1522; --ok:#46c07a; --warn:#e0a13c; --err:#e05c5c;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg:#f3f5f8; --panel:#ffffff; --panel2:#eef1f5; --border:#d4dae2;
+      --text:#1b2430; --muted:#5d6a79; --accent:#1f6fd1; --on-accent:#ffffff; --ok:#23824f; --warn:#a86400; --err:#c0392b;
+    }
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) {
+        color-scheme: light;
+        --bg:#f3f5f8; --panel:#ffffff; --panel2:#eef1f5; --border:#d4dae2;
+        --text:#1b2430; --muted:#5d6a79; --accent:#1f6fd1; --on-accent:#ffffff; --ok:#23824f; --warn:#a86400; --err:#c0392b;
+      }
+    }
     * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    main { width:min(760px,100%); margin:auto; padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom)); }
+    body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--text); font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { width:min(760px,100%); margin:0 auto; padding:max(18px,env(safe-area-inset-top)) 16px 28px; flex:1 0 auto; }
     header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:18px; }
     h1 { margin:0; font-size:clamp(1.45rem,7vw,2.15rem); line-height:1.08; }
     .brand { display:inline-flex; align-items:baseline; letter-spacing:-.045em; font-weight:900; }
     .brand-gps { color:var(--text); }
-    .brand-two { color:var(--brand-red); padding:0 .035em; }
+    .brand-two { color:var(--err); padding:0 .035em; }
     .brand-utm { color:var(--accent); }
     .brand-version { margin-left:.45rem; color:var(--muted); font-size:.34em; font-weight:500; letter-spacing:0; white-space:nowrap; }
     header p { margin:.45rem 0 0; color:var(--muted); }
     button { font:inherit; }
-    .icon-btn { width:44px; height:44px; flex:0 0 auto; border:1px solid var(--border); border-radius:12px; background:var(--card); color:var(--text); cursor:pointer; }
+    .top-actions { display:flex; gap:6px; flex:0 0 auto; }
+    .icon-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:44px; height:44px; padding:0 10px; border:1px solid var(--border); border-radius:10px; background:var(--panel2); color:var(--text); cursor:pointer; font-size:.85rem; font-weight:600; }
+    .icon-btn:hover { border-color:var(--accent); }
+    .icon-btn svg { display:block; }
+    .flag { width:21px; height:14px; border-radius:2px; box-shadow:0 0 0 1px rgba(0,0,0,.25); }
+    :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
     .actions { display:grid; grid-template-columns:1fr auto; gap:10px; margin-bottom:14px; }
-    .primary { min-height:52px; border:0; border-radius:12px; padding:0 18px; background:var(--accent); color:#00151c; font-weight:850; cursor:pointer; }
-    :root.light .primary { color:#fff; }
-    .secondary { min-height:52px; border:1px solid var(--border); border-radius:12px; padding:0 14px; background:var(--card); color:var(--text); cursor:pointer; }
-    .status { display:flex; gap:9px; align-items:center; min-height:44px; padding:10px 12px; margin-bottom:14px; border:1px solid var(--border); border-radius:12px; background:var(--card2); color:var(--muted); }
+    .primary { min-height:52px; border:0; border-radius:10px; padding:0 18px; background:var(--accent); color:var(--on-accent); font-weight:800; cursor:pointer; }
+    .secondary { min-height:52px; border:1px solid var(--border); border-radius:10px; padding:0 14px; background:var(--panel); color:var(--text); cursor:pointer; }
+    .secondary:hover, .mini:hover { border-color:var(--accent); }
+    .status { display:flex; gap:9px; align-items:center; min-height:44px; padding:10px 12px; margin-bottom:14px; border:1px solid var(--border); border-radius:10px; background:var(--panel2); color:var(--muted); }
     .dot { width:10px; height:10px; border-radius:50%; background:var(--muted); flex:0 0 auto; }
     .status.live .dot { background:var(--ok); box-shadow:0 0 0 5px color-mix(in srgb,var(--ok) 18%,transparent); }
     .grid { display:grid; gap:12px; }
-    .card { padding:16px; background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 9px 28px rgba(0,0,0,.13); }
-    .card h2 { margin:0 0 12px; font-size:.82rem; color:var(--muted); letter-spacing:.11em; text-transform:uppercase; }
-    .big { font-size:clamp(1.28rem,5.7vw,1.8rem); font-weight:850; overflow-wrap:anywhere; }
+    .card { padding:16px; background:var(--panel); border:1px solid var(--border); border-radius:10px; }
+    .card h2 { margin:0 0 12px; font-size:.82rem; color:var(--accent); letter-spacing:.08em; text-transform:uppercase; }
+    .big { font-size:clamp(1.28rem,5.7vw,1.8rem); font-weight:800; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
     .big + .big { margin-top:3px; }
     .meta { margin-top:8px; color:var(--muted); font-size:.9rem; }
     .rows { display:grid; gap:0; }
-    .row { display:grid; grid-template-columns:minmax(105px,.8fr) minmax(0,1.4fr); gap:12px; padding:10px 0; border-top:1px solid color-mix(in srgb,var(--border) 65%,transparent); }
+    .row { display:grid; grid-template-columns:minmax(105px,.8fr) minmax(0,1.4fr); gap:12px; padding:10px 0; border-top:1px solid var(--border); }
     .row:first-child { border-top:0; padding-top:0; }
     .label { color:var(--muted); }
     .value { text-align:right; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
     .copy { cursor:pointer; color:var(--accent); background:transparent; border:0; padding:0; text-align:right; }
     details { margin-top:12px; }
     summary { color:var(--accent); cursor:pointer; }
-    .notice { border-left:4px solid var(--warn); }
+    .notice { border-left:3px solid var(--warn); }
     .notice p { margin:.4rem 0 0; color:var(--muted); font-size:.9rem; }
     .manual { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; margin-top:12px; }
-    input { width:100%; min-width:0; border:1px solid var(--border); border-radius:9px; padding:10px; background:var(--card2); color:var(--text); font:inherit; }
-    .mini { border:1px solid var(--border); border-radius:9px; background:var(--card2); color:var(--text); padding:0 12px; cursor:pointer; }
-    .other-apps { margin-top:18px; }
-    .other-title { margin:0 0 8px; color:var(--muted); font-size:.7rem; font-weight:800; letter-spacing:.13em; text-align:center; text-transform:uppercase; }
-    .app-list { display:grid; gap:8px; }
-    .app-card { display:flex; align-items:center; gap:12px; min-height:64px; padding:11px 13px; border:1px solid color-mix(in srgb,var(--accent) 24%,var(--border)); border-radius:14px; background:color-mix(in srgb,var(--accent) 5%,var(--card)); color:var(--text); text-decoration:none; transition:border-color .18s,background .18s,transform .18s; }
-    .app-card:hover { border-color:var(--accent); background:color-mix(in srgb,var(--accent) 12%,var(--card)); transform:translateY(-1px); }
-    .app-name { flex:0 0 116px; font-size:1rem; font-weight:900; letter-spacing:-.03em; white-space:nowrap; }
-    .app-name .accent { color:var(--accent); }
-    .app-name.pointcloud { white-space:normal; line-height:1.05; }
-    .app-name .alarm { color:var(--brand-red); }
-    .app-copy { min-width:0; color:var(--muted); font-size:.76rem; line-height:1.35; }
-    .app-arrow { margin-left:auto; color:var(--accent); font-size:1.1rem; }
-    .support-links { display:flex; flex-wrap:wrap; justify-content:center; gap:7px; margin-top:10px; }
-    .support-links a { padding:5px 9px; border-radius:7px; background:var(--card2); color:var(--accent); font-size:.76rem; text-decoration:none; }
-    footer { margin:20px 4px 0; color:var(--muted); font-size:.78rem; }
-    footer a,.card a { color:var(--accent); }
+    input { width:100%; min-width:0; border:1px solid var(--border); border-radius:8px; padding:10px; background:var(--panel2); color:var(--text); font:inherit; }
+    .mini { border:1px solid var(--border); border-radius:8px; background:var(--panel2); color:var(--text); padding:0 12px; cursor:pointer; }
+    .disclaimer { margin:16px 2px 0; color:var(--muted); font-size:.8rem; }
     .hidden { display:none !important; }
-    @media (min-width:680px) { .grid { grid-template-columns:1fr 1fr; } .wide { grid-column:1/-1; } .app-list { grid-template-columns:repeat(3,1fr); } .app-card { align-items:flex-start; flex-direction:column; } .app-name { flex-basis:auto; } .app-arrow { display:none; } }
-    @media (max-width:390px) { .actions { grid-template-columns:1fr; } .secondary { min-height:44px; } .manual { grid-template-columns:1fr 1fr; } .manual button { grid-column:1/-1; min-height:42px; } .row { grid-template-columns:1fr; gap:2px; } .value,.copy { text-align:left; } .app-name { flex-basis:104px; font-size:.92rem; } }
+
+    /* Fußleisten */
+    .app-footer { background:var(--panel); border-top:1px solid var(--border); font-size:11px; padding-bottom:env(safe-area-inset-bottom); }
+    .related-apps, .footer-meta, .footer-links { display:flex; align-items:center; flex-wrap:wrap; gap:6px 7px; }
+    .related-apps { padding:8px 16px; }
+    .related-apps strong { color:var(--muted); font-weight:550; margin-right:2px; }
+    .footer-meta { justify-content:space-between; padding:7px 16px; border-top:1px solid var(--border); color:var(--muted); }
+    .related-apps a, .footer-links a, .footer-links button {
+      display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border:1px solid var(--border); border-radius:20px;
+      background:var(--panel2); color:var(--muted); font:inherit; font-size:11px; line-height:1.5; text-decoration:none; cursor:pointer;
+    }
+    .app-footer a:hover, .app-footer button:hover { border-color:var(--accent); color:var(--text); }
+
+    /* Dialoge */
+    dialog { padding:0; border:1px solid var(--border); border-radius:12px; background:var(--panel); color:var(--text); width:min(640px,calc(100vw - 32px)); max-height:calc(100vh - 48px); }
+    dialog::backdrop { background:rgba(0,0,0,.55); }
+    .dlg-head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; border-bottom:1px solid var(--border); }
+    .dlg-head h2 { margin:0; font-size:17px; }
+    .dlg-head button, .btn { background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font:inherit; font-size:14px; cursor:pointer; text-decoration:none; }
+    .dlg-head button:hover, .btn:hover { border-color:var(--accent); }
+    .dlg-body { padding:14px 18px 18px; font-size:14px; }
+    .dlg-body .actions { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+    .dlg-body .addr { color:var(--accent); font-weight:600; }
+    .dlg-body .muted { color:var(--muted); }
+    .dlg-body table { width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
+    .dlg-body th, .dlg-body td { text-align:left; padding:4px 6px; border-bottom:1px solid var(--border); vertical-align:top; }
+    .dlg-body th { color:var(--muted); font-weight:500; width:38%; }
+    .dlg-body a { color:var(--accent); }
+
+    @media (min-width:680px) { .grid { grid-template-columns:1fr 1fr; } .wide { grid-column:1/-1; } }
+    @media (max-width:390px) { .actions { grid-template-columns:1fr; } .secondary { min-height:44px; } .manual { grid-template-columns:1fr 1fr; } .manual button { grid-column:1/-1; min-height:42px; } .row { grid-template-columns:1fr; gap:2px; } .value,.copy { text-align:left; } }
   </style>
 </head>
 <body>
 <main>
   <header>
-    <div><h1 class="brand" aria-label="GPS2UTM"><span class="brand-gps">GPS</span><span class="brand-two">2</span><span class="brand-utm">UTM</span><sup class="brand-version app-version"></sup></h1><p>WGS 84 zu ETRS89 / UTM, Gauß‑Krüger und DHHN2016</p></div>
-    <button id="theme" class="icon-btn" aria-label="Darstellung wechseln">☀</button>
+    <div><h1 class="brand" aria-label="GPS2UTM"><span class="brand-gps">GPS</span><span class="brand-two">2</span><span class="brand-utm">UTM</span><sup class="brand-version app-version"></sup></h1><p data-i18n="app.tagline"></p></div>
+    <div class="top-actions">
+      <button id="btn-theme" class="icon-btn" type="button"></button>
+      <button id="btn-lang" class="icon-btn" type="button"></button>
+    </div>
   </header>
 
   <div class="actions">
-    <button id="gps" class="primary">◎ GPS-Standort erfassen</button>
-    <button id="reference" class="secondary">Prüfpunkt Lübben</button>
+    <button id="gps" class="primary" type="button"></button>
+    <button id="reference" class="secondary" type="button" data-i18n="btn.reference"></button>
   </div>
-  <div id="status" class="status"><span class="dot"></span><span>Bereit – Standortzugriff startet erst nach Antippen.</span></div>
+  <div id="status" class="status"><span class="dot"></span><span></span></div>
 
   <section id="results" class="grid hidden" aria-live="polite">
     <article class="card wide">
@@ -94,116 +144,224 @@
     </article>
 
     <article class="card">
-      <h2>WGS 84 / ETRS89 geografisch</h2>
+      <h2 data-i18n="card.geo"></h2>
       <div class="rows">
-        <div class="row"><span class="label">Dezimal</span><button id="copy-decimal" class="copy value"></button></div>
-        <div class="row"><span class="label">Breite</span><span id="lat-dms" class="value"></span></div>
-        <div class="row"><span class="label">Länge</span><span id="lon-dms" class="value"></span></div>
-        <div class="row"><span class="label">GPS-Genauigkeit</span><span id="accuracy" class="value"></span></div>
+        <div class="row"><span class="label" data-i18n="row.decimal"></span><button id="copy-decimal" class="copy value" type="button"></button></div>
+        <div class="row"><span class="label" data-i18n="row.lat"></span><span id="lat-dms" class="value"></span></div>
+        <div class="row"><span class="label" data-i18n="row.lon"></span><span id="lon-dms" class="value"></span></div>
+        <div class="row"><span class="label" data-i18n="row.accuracy"></span><span id="accuracy" class="value"></span></div>
       </div>
     </article>
 
     <article class="card">
-      <h2>Höhen</h2>
+      <h2 data-i18n="card.heights"></h2>
       <div class="rows">
-        <div class="row"><span class="label">Ellipsoidisch h</span><span id="ell-height" class="value"></span></div>
-        <div class="row"><span class="label">GCG2016 ζ</span><span id="geoid-height" class="value">wird geladen…</span></div>
+        <div class="row"><span class="label" data-i18n="row.ellHeight"></span><span id="ell-height" class="value"></span></div>
+        <div class="row"><span class="label">GCG2016 ζ</span><span id="geoid-height" class="value"></span></div>
         <div class="row"><span class="label">DHHN2016 H</span><span id="normal-height" class="value"></span></div>
       </div>
-      <p class="meta">H = h − ζ. Eine Handy-GPS-Höhe ist häufig deutlich ungenauer als die Lage und kann fehlen.</p>
+      <p class="meta" data-i18n="heights.note"></p>
     </article>
 
     <article class="card wide">
-      <h2>Gauß‑Krüger (DHDN)</h2>
+      <h2 data-i18n="card.gk"></h2>
       <div id="gk-rows" class="rows"></div>
-      <p class="meta">Automatisch wird der nächstgelegene 3°-Streifen hervorgehoben. Die Transformation nutzt die bundesweite 7‑Parameter-Näherung; für amtliche Dezimeter-Genauigkeit ist das BeTA2007-Gitter erforderlich.</p>
+      <p class="meta" data-i18n="gk.note"></p>
     </article>
 
     <article id="reference-result" class="card notice wide hidden">
-      <h2>Prüfung gegen amtlichen Kontrollpunkt</h2>
+      <h2 data-i18n="ref.title"></h2>
       <div id="reference-text"></div>
-      <p>Soll: UTM 33U 424122,72 / 5755180,43 m, h 94,04 m, H 53,03 m.</p>
+      <p data-i18n="ref.target"></p>
     </article>
   </section>
 
   <details class="card" style="margin-top:12px">
-    <summary>Koordinate manuell prüfen</summary>
-    <div class="manual"><input id="manual-lat" inputmode="decimal" aria-label="Breitengrad" placeholder="Breite"><input id="manual-lon" inputmode="decimal" aria-label="Längengrad" placeholder="Länge"><button id="manual-go" class="mini">Umrechnen</button></div>
+    <summary data-i18n="manual.summary"></summary>
+    <div class="manual"><input id="manual-lat" inputmode="decimal" data-i18n-aria-label="manual.latAria" data-i18n-placeholder="manual.lat"><input id="manual-lon" inputmode="decimal" data-i18n-aria-label="manual.lonAria" data-i18n-placeholder="manual.lon"><button id="manual-go" class="mini" type="button" data-i18n="manual.go"></button></div>
   </details>
 
-  <nav class="other-apps" aria-label="Weitere Apps und Links">
-    <div class="other-title">Weitere Apps</div>
-    <div class="app-list">
-      <a class="app-card" href="https://skycheck-de.netlify.app/" target="_blank" rel="noopener">
-        <span class="app-name">Sky<span class="accent">Check</span></span>
-        <span class="app-copy">Drohnenflugprüfung mit Geozonen, Wetter und Luftrauminformationen</span>
-        <span class="app-arrow" aria-hidden="true">→</span>
-      </a>
-      <a class="app-card" href="https://skyalarm.netlify.app/" target="_blank" rel="noopener">
-        <span class="app-name">Sky<span class="alarm">Alarm</span></span>
-        <span class="app-copy">Echtzeit-Tiefflieger-Alarm und Geozonen-Karte</span>
-        <span class="app-arrow" aria-hidden="true">→</span>
-      </a>
-      <a class="app-card" href="https://pointcloud-manager.app/" target="_blank" rel="noopener">
-        <span class="app-name pointcloud">PointCloud<span class="accent"> Manager</span></span>
-        <span class="app-copy">Punktwolken verwalten, prüfen und für weitere Workflows vorbereiten</span>
-        <span class="app-arrow" aria-hidden="true">→</span>
-      </a>
-    </div>
-    <div class="support-links">
-      <a href="https://www.michael-radeck.de" target="_blank" rel="noopener">michael-radeck.de</a>
-      <a href="https://ko-fi.com/mradeck/tip" target="_blank" rel="noopener">☕ Ko-fi</a>
-    </div>
-  </nav>
-
-  <footer>
-    Koordinaten sind eine Orientierungshilfe, kein Vermessungsnachweis. GCG2016 © GeoBasis-DE / BKG (2026), <a href="https://creativecommons.org/licenses/by/4.0/deed.de" target="_blank" rel="noopener">CC BY 4.0</a>. Bezug: <a href="https://gdz.bkg.bund.de/koordinatentransformation" target="_blank" rel="noopener">BKG Koordinatentransformation</a>. · GPS2UTM <span class="app-version"></span>
-  </footer>
+  <p class="disclaimer" data-i18n="disclaimer"></p>
 </main>
-<script src="coordinate-tools.js?v=26.08.3.0"></script>
+
+<footer class="app-footer">
+  <nav class="related-apps" data-i18n-aria-label="footer.apps">
+    <strong data-i18n="footer.apps"></strong>
+    <a href="https://geodata-inspector-cleaner.netlify.app/" target="_blank" rel="noopener noreferrer">Geodata Inspector &amp; Cleaner <span aria-hidden="true">↗</span></a>
+    <a href="https://mradeck.github.io/geotiff-inspector/" target="_blank" rel="noopener noreferrer">GeoTIFF Inspector <span aria-hidden="true">↗</span></a>
+    <a href="https://measuremap-viewer-editor-emlid.netlify.app/" target="_blank" rel="noopener noreferrer">MeasureMap <span aria-hidden="true">↗</span></a>
+    <a href="https://geoid-forge.netlify.app/" target="_blank" rel="noopener noreferrer">Geoid Forge <span aria-hidden="true">↗</span></a>
+    <a href="https://dxf-coordinate-forge.netlify.app/" target="_blank" rel="noopener noreferrer">DXF Coordinate Forge <span aria-hidden="true">↗</span></a>
+    <a href="https://www.pointcloud-manager.com" target="_blank" rel="noopener noreferrer">PointCloud Manager <span aria-hidden="true">↗</span></a>
+    <a href="https://skycheck-de.netlify.app/" target="_blank" rel="noopener noreferrer">SkyCheck <span aria-hidden="true">↗</span></a>
+    <a href="https://www.michael-radeck.de" target="_blank" rel="noopener noreferrer">michael-radeck.de <span aria-hidden="true">↗</span></a>
+  </nav>
+  <div class="footer-meta">
+    <span><span data-i18n="footer.author"></span> · © <span id="footer-year"></span> · <span id="footer-version"></span></span>
+    <nav class="footer-links" data-i18n-aria-label="footer.linksAria">
+      <a href="https://creativecommons.org/licenses/by/4.0/deed.de" target="_blank" rel="noopener noreferrer"><span data-i18n="footer.gcg"></span> ↗</a>
+      <a href="https://gdz.bkg.bund.de/koordinatentransformation" target="_blank" rel="noopener noreferrer"><span data-i18n="footer.bkg"></span> ↗</a>
+      <a href="https://github.com/mradeck/gps-utm-coordinate-converter" target="_blank" rel="noopener noreferrer"><span data-i18n="footer.source"></span> ↗</a>
+      <button id="footer-support" type="button" data-i18n="footer.support"></button>
+      <button id="footer-licenses" type="button" data-i18n="footer.licenses"></button>
+      <a href="https://www.multikopterschule.de/Kontakt-Impressum/IMPRESSUM/" target="_blank" rel="noopener noreferrer"><span data-i18n="footer.imprint"></span> ↗</a>
+      <a href="https://ko-fi.com/mradeck/tip" target="_blank" rel="noopener noreferrer" data-i18n-aria-label="footer.kofiAria"><span aria-hidden="true">☕</span> Ko-fi</a>
+    </nav>
+  </div>
+</footer>
+
+<dialog id="support-dialog" aria-labelledby="support-title">
+  <div class="dlg-head"><h2 id="support-title" data-i18n="footer.support"></h2><form method="dialog"><button type="submit" data-i18n-aria-label="dialog.close">×</button></form></div>
+  <div class="dlg-body">
+    <p data-i18n="support.intro"></p>
+    <div class="actions">
+      <a id="support-help" class="btn" href="https://github.com/mradeck/gps-utm-coordinate-converter#readme" target="_blank" rel="noopener noreferrer" data-i18n="support.help"></a>
+      <a id="support-bugreport" class="btn" href="mailto:michael.radeck@email.de" data-i18n="support.bugreport"></a>
+      <a id="support-contact" class="btn" href="mailto:michael.radeck@email.de" data-i18n="support.contact"></a>
+    </div>
+    <p class="addr">michael.radeck@email.de</p>
+    <p data-i18n="support.bugHint"></p>
+    <p class="muted" data-i18n="support.privacy"></p>
+  </div>
+</dialog>
+
+<dialog id="licenses-dialog" aria-labelledby="licenses-title">
+  <div class="dlg-head"><h2 id="licenses-title" data-i18n="footer.licenses"></h2><form method="dialog"><button type="submit" data-i18n-aria-label="dialog.close">×</button></form></div>
+  <div class="dlg-body">
+    <p data-i18n="lic.intro"></p>
+    <table>
+      <tr><th data-i18n="lic.component"></th><td><b data-i18n="lic.license"></b> · <span data-i18n="lic.use"></span></td></tr>
+      <tr><th data-i18n="lic.app"></th><td>© Michael Radeck · <span data-i18n="lic.appUse"></span></td></tr>
+      <tr><th>GCG2016 (BKG)</th><td><a href="https://creativecommons.org/licenses/by/4.0/deed.de" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> · <span data-i18n="lic.gcgHolder"></span> · <span data-i18n="lic.gcg"></span></td></tr>
+      <tr><th data-i18n="lic.transform"></th><td><a href="https://gdz.bkg.bund.de/koordinatentransformation" target="_blank" rel="noopener noreferrer">BKG</a> · <span data-i18n="lic.transformUse"></span></td></tr>
+    </table>
+  </div>
+</dialog>
+
+<script src="i18n.js?v=26.11.4.0"></script>
+<script src="coordinate-tools.js?v=26.11.4.0"></script>
 <script>
   'use strict';
-  const APP_VERSION = '26.08.3.0';
+  const APP_VERSION = '26.11.4.0';
   const APP_VERSION_CODE = `v${APP_VERSION}`;
-  document.title = `GPS2UTM ${APP_VERSION_CODE} — Koordinaten`;
-  document.querySelectorAll('.app-version').forEach(element => { element.textContent = APP_VERSION_CODE; });
+  const { t } = window.I18N;
   const REF = { lat: 51 + 56 / 60 + 31.768 / 3600, lon: 13 + 53 / 60 + 46.094 / 3600, altitude: 94.04 };
   let watchId = null;
   let renderSequence = 0;
+  let lastStatus = { key: 'status.ready', params: null, live: false };
+  let lastRender = null;
   const $ = id => document.getElementById(id);
-  const fmt = (value, digits = 2) => Number(value).toLocaleString('de-DE', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  const fmt = (value, digits = 2) => Number(value).toLocaleString(I18N.locale(), { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
-  function setStatus(text, live = false) {
-    $('status').classList.toggle('live', live);
-    $('status').querySelector('span:last-child').textContent = text;
+  // -------------------------------------------------------------------------
+  // Sprache und Interface-Farbe
+  // -------------------------------------------------------------------------
+  const FLAG_DE = '<svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><path fill="#000" d="M0 0h30v7H0z"/><path fill="#d00" d="M0 7h30v6H0z"/><path fill="#ffce00" d="M0 13h30v7H0z"/></svg>';
+  const FLAG_GB = '<svg class="flag" viewBox="0 0 60 40" aria-hidden="true"><defs><clipPath id="gb-clip"><path d="M0 0h60v40H0z"/></clipPath></defs><g clip-path="url(#gb-clip)"><path fill="#012169" d="M0 0h60v40H0z"/><path stroke="#fff" stroke-width="8" d="m0 0 60 40M0 40 60 0"/><path stroke="#c8102e" stroke-width="3" d="m0 0 60 40M0 40 60 0"/><path stroke="#fff" stroke-width="13" d="M30 0v40M0 20h60"/><path stroke="#c8102e" stroke-width="8" d="M30 0v40M0 20h60"/></g></svg>';
+  const ICON = {
+    auto: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>',
+    light: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>',
+    dark: '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z" fill="currentColor"/></svg>',
+  };
+  const store = {
+    get: k => { try { return localStorage.getItem(k); } catch (_) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch (_) { /* nur Sitzung */ } },
+  };
+  let themeMode = ['light', 'dark'].includes(store.get('gps2utm.theme')) ? store.get('gps2utm.theme') : 'auto';
+  const lightQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+
+  function applyTheme() {
+    if (themeMode === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', themeMode);
+    const light = themeMode === 'light' || (themeMode === 'auto' && lightQuery?.matches);
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', light ? '#f3f5f8' : '#14171c');
+    const btn = $('btn-theme');
+    btn.innerHTML = ICON[themeMode];
+    const label = t(`theme.${themeMode}`);
+    btn.title = label; btn.setAttribute('aria-label', label);
+  }
+  $('btn-theme').addEventListener('click', () => {
+    themeMode = themeMode === 'auto' ? 'light' : themeMode === 'light' ? 'dark' : 'auto';
+    store.set('gps2utm.theme', themeMode);
+    applyTheme();
+  });
+  lightQuery?.addEventListener?.('change', () => { if (themeMode === 'auto') applyTheme(); });
+
+  function applyStaticTexts() {
+    const lang = I18N.getLanguage();
+    document.documentElement.lang = lang;
+    document.title = `GPS2UTM ${APP_VERSION_CODE} — ${t('app.title')}`;
+    document.querySelectorAll('[data-i18n]').forEach(n => { n.textContent = t(n.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(n => n.setAttribute('aria-label', t(n.dataset.i18nAriaLabel)));
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(n => n.setAttribute('placeholder', t(n.dataset.i18nPlaceholder)));
+    const btn = $('btn-lang');
+    btn.innerHTML = `${lang === 'de' ? FLAG_DE : FLAG_GB}<span>${lang.toUpperCase()}</span>`;
+    btn.title = t('lang.toggle'); btn.setAttribute('aria-label', t('lang.toggle'));
+    $('footer-version').textContent = t('footer.version', { v: APP_VERSION_CODE });
+    const subject = kind => `GPS / UTM Converter ${APP_VERSION_CODE} – ${t(kind === 'bug' ? 'support.bugSubject' : 'support.contactSubject')}`;
+    $('support-bugreport').href = `mailto:michael.radeck@email.de?subject=${encodeURIComponent(subject('bug'))}&body=${encodeURIComponent(t('support.bugBody'))}`;
+    $('support-contact').href = `mailto:michael.radeck@email.de?subject=${encodeURIComponent(subject('contact'))}`;
+    $('gps').textContent = t(watchId != null ? 'btn.gpsStop' : 'btn.gps');
+    applyTheme();
+  }
+  $('btn-lang').addEventListener('click', () => {
+    const next = I18N.getLanguage() === 'de' ? 'en' : 'de';
+    store.set('gps2utm.lang', next);
+    I18N.setLanguage(next);
+  });
+  I18N.onLanguageChange(() => {
+    applyStaticTexts();
+    renderStatus();
+    if (lastRender) renderPosition(lastRender.lat, lastRender.lon, lastRender.options).catch(() => {});
+  });
+
+  document.querySelectorAll('.app-version').forEach(element => { element.textContent = APP_VERSION_CODE; });
+  $('footer-year').textContent = String(new Date().getFullYear());
+  $('footer-support').addEventListener('click', () => $('support-dialog').showModal());
+  $('footer-licenses').addEventListener('click', () => $('licenses-dialog').showModal());
+
+  // -------------------------------------------------------------------------
+  // Umrechnung und Anzeige
+  // -------------------------------------------------------------------------
+  function renderStatus() {
+    $('status').classList.toggle('live', lastStatus.live);
+    const p = lastStatus.params && lastStatus.params.timestamp != null
+      ? { time: new Date(lastStatus.params.timestamp).toLocaleTimeString(I18N.locale(), { hour:'2-digit', minute:'2-digit', second:'2-digit' }) }
+      : lastStatus.params;
+    $('status').querySelector('span:last-child').textContent = t(lastStatus.key, p);
+  }
+  function setStatus(key, params = null, live = false) {
+    lastStatus = { key, params, live };
+    renderStatus();
   }
 
   async function renderPosition(lat, lon, options = {}) {
     const seq = ++renderSequence;
     const c = GeoCoordinates.convert(lat, lon);
+    lastRender = { lat, lon, options };
     $('results').classList.remove('hidden');
     $('utm-e').textContent = `E ${fmt(c.utm.easting)} m`;
     $('utm-n').textContent = `N ${fmt(c.utm.northing)} m`;
-    $('utm-meta').textContent = `Zone ${c.utm.zoneBand} · EPSG:${c.utm.epsg} · Zonenpräfix ${fmt(c.utm.prefixedEasting)}`;
+    $('utm-meta').textContent = t('utm.meta', { zone: c.utm.zoneBand, epsg: c.utm.epsg, prefixed: fmt(c.utm.prefixedEasting) });
     $('copy-decimal').textContent = `${lat.toFixed(8)}, ${lon.toFixed(8)}  ⧉`;
     $('copy-decimal').dataset.copy = `${lat.toFixed(8)}, ${lon.toFixed(8)}`;
     $('lat-dms').textContent = c.wgs84.latDms;
     $('lon-dms').textContent = c.wgs84.lonDms;
-    $('accuracy').textContent = Number.isFinite(options.accuracy) ? `± ${fmt(options.accuracy, 0)} m horizontal` : 'nicht verfügbar';
+    $('accuracy').textContent = Number.isFinite(options.accuracy) ? t('acc.value', { v: fmt(options.accuracy, 0) }) : t('acc.na');
     $('ell-height').textContent = Number.isFinite(options.altitude)
-      ? `${fmt(options.altitude)} m${Number.isFinite(options.altitudeAccuracy) ? ` (± ${fmt(options.altitudeAccuracy, 0)} m)` : ''}` : 'vom Gerät nicht geliefert';
-    $('normal-height').textContent = Number.isFinite(options.altitude) ? 'wird berechnet…' : 'ohne GPS-Höhe nicht berechenbar';
-    $('geoid-height').textContent = 'wird geladen…';
+      ? `${fmt(options.altitude)} m${Number.isFinite(options.altitudeAccuracy) ? ` (± ${fmt(options.altitudeAccuracy, 0)} m)` : ''}` : t('ell.missing');
+    $('normal-height').textContent = Number.isFinite(options.altitude) ? t('normal.calc') : t('normal.noAlt');
+    $('geoid-height').textContent = t('geoid.loading');
     $('gk-rows').innerHTML = [2, 3, 4, 5].map(zone => {
       const gk = GeoCoordinates.gaussKrueger(lat, lon, zone);
-      const active = zone === c.gk.zone ? ' <strong>· automatisch</strong>' : '';
-      return `<div class="row"><span class="label">Streifen ${zone} · EPSG:${gk.epsg}${active}</span><span class="value">R ${fmt(gk.easting)} · H ${fmt(gk.northing)} m</span></div>`;
+      const active = zone === c.gk.zone ? ` <strong>${t('gk.auto')}</strong>` : '';
+      return `<div class="row"><span class="label">${t('gk.row', { zone, epsg: gk.epsg })}${active}</span><span class="value">${t('gk.value', { e: fmt(gk.easting), n: fmt(gk.northing) })}</span></div>`;
     }).join('');
 
     try {
       const geoid = await GeoCoordinates.geoidAt(lat, lon);
       if (seq !== renderSequence) return;
-      $('geoid-height').textContent = Number.isFinite(geoid) ? `${fmt(geoid)} m` : 'außerhalb des Deutschland-Gitters';
+      $('geoid-height').textContent = Number.isFinite(geoid) ? `${fmt(geoid)} m` : t('geoid.outside');
       if (Number.isFinite(geoid) && Number.isFinite(options.altitude)) {
         $('normal-height').textContent = `${fmt(GeoCoordinates.normalHeight(options.altitude, geoid))} m NHN`;
       }
@@ -212,46 +370,48 @@
         const de = c.utm.easting - 424122.72;
         const dn = c.utm.northing - 5755180.43;
         const dh = Number.isFinite(geoid) ? GeoCoordinates.normalHeight(REF.altitude, geoid) - 53.03 : NaN;
-        $('reference-text').innerHTML = `Abweichung: UTM E ${fmt(de, 3)} m · N ${fmt(dn, 3)} m · DHHN2016 ${fmt(dh, 3)} m.`;
+        $('reference-text').textContent = t('ref.deviation', { de: fmt(de, 3), dn: fmt(dn, 3), dh: fmt(dh, 3) });
       } else {
         $('reference-result').classList.add('hidden');
       }
     } catch (error) {
       if (seq === renderSequence) {
-        $('geoid-height').textContent = 'GCG2016 konnte nicht geladen werden – bitte Seite neu laden';
-        $('normal-height').textContent = 'nicht berechenbar';
+        $('geoid-height').textContent = t('geoid.failed');
+        $('normal-height').textContent = t('normal.na');
       }
     }
   }
 
   $('gps').addEventListener('click', () => {
-    if (!navigator.geolocation) { setStatus('Dieses Gerät stellt keine Standort-API bereit.'); return; }
-    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; $('gps').textContent = '◎ GPS-Standort erfassen'; setStatus('Live-Aktualisierung angehalten.'); return; }
-    setStatus('GPS-Position wird ermittelt…');
-    $('gps').textContent = '■ GPS stoppen';
+    if (!navigator.geolocation) { setStatus('status.noApi'); return; }
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; $('gps').textContent = t('btn.gps'); setStatus('status.paused'); return; }
+    setStatus('status.locating');
+    $('gps').textContent = t('btn.gpsStop');
     watchId = navigator.geolocation.watchPosition(position => {
       const p = position.coords;
-      setStatus(`Live · aktualisiert ${new Date(position.timestamp).toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit', second:'2-digit' })}`, true);
+      setStatus('status.live', { timestamp: position.timestamp }, true);
       renderPosition(p.latitude, p.longitude, { accuracy:p.accuracy, altitude:p.altitude, altitudeAccuracy:p.altitudeAccuracy });
     }, error => {
-      setStatus(error.code === 1 ? 'Standortzugriff wurde nicht erlaubt.' : 'GPS-Position ist derzeit nicht verfügbar.');
-      navigator.geolocation.clearWatch(watchId); watchId = null; $('gps').textContent = '◎ GPS-Standort erfassen';
+      setStatus(error.code === 1 ? 'status.denied' : 'status.unavailable');
+      navigator.geolocation.clearWatch(watchId); watchId = null; $('gps').textContent = t('btn.gps');
     }, { enableHighAccuracy:true, maximumAge:1000, timeout:15000 });
   });
 
-  $('reference').addEventListener('click', () => { setStatus('Amtlicher Kontrollpunkt Lübben geladen.'); renderPosition(REF.lat, REF.lon, { altitude:REF.altitude, reference:true }); });
+  $('reference').addEventListener('click', () => { setStatus('status.reference'); renderPosition(REF.lat, REF.lon, { altitude:REF.altitude, reference:true }); });
   $('manual-go').addEventListener('click', () => {
     const lat = Number(String($('manual-lat').value).replace(',', '.'));
     const lon = Number(String($('manual-lon').value).replace(',', '.'));
-    try { renderPosition(lat, lon); setStatus('Manuelle Koordinate umgerechnet.'); } catch (_) { setStatus('Bitte gültige Breite und Länge eingeben.'); }
+    try { renderPosition(lat, lon); setStatus('status.manual'); } catch (_) { setStatus('status.invalid'); }
   });
-  $('copy-decimal').addEventListener('click', async e => { await navigator.clipboard?.writeText(e.currentTarget.dataset.copy || ''); setStatus('Koordinate kopiert.'); });
-  $('theme').addEventListener('click', () => { document.documentElement.classList.toggle('light'); $('theme').textContent = document.documentElement.classList.contains('light') ? '☾' : '☀'; });
+  $('copy-decimal').addEventListener('click', async e => { await navigator.clipboard?.writeText(e.currentTarget.dataset.copy || ''); setStatus('status.copied'); });
+
+  applyStaticTexts();
+  setStatus('status.ready');
 
   const query = new URLSearchParams(location.search);
   if (query.has('lat') && query.has('lon')) {
     const lat = Number(query.get('lat')), lon = Number(query.get('lon'));
-    try { renderPosition(lat, lon); setStatus('Übergebene Kartenposition umgerechnet.'); } catch (_) {}
+    try { renderPosition(lat, lon); setStatus('status.query'); } catch (_) {}
   }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>

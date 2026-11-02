@@ -1,7 +1,8 @@
-const CACHE = 'gps2utm-26.08.3.0';
+const CACHE = 'gps2utm-26.11.4.0';
 const SHELL = [
   './',
   './index.html',
+  './i18n.js',
   './coordinate-tools.js',
   './data/gcg2016v2023-cm.i16',
   './icon.svg',
