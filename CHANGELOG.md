@@ -2,6 +2,11 @@
 
 Versionsschema `Jahr.Push.Iteration` (siehe README, Abschnitt „Versionierung“); ältere Einträge folgen dem früheren Schema `vYY.MM.major.subversion`.
 
+## v26.5.3 — 2026-11-02
+
+- Favicon: Variante mit kräftigeren Linien (bei 16 px besser lesbar).
+- Service-Worker-Cache `gps2utm-26.5.3`.
+
 ## v26.5.2 — 2026-11-02
 
 - Favicon neu und sichtbar: `favicon.svg` zeigt das Markenzeichen der Kopfleiste (Fadenkreuz mit Positionsmarke, Blau `#1f6fd1` auf Hellgrau, Rahmen mit Radius 9/34) in der Darstellung des hellen Interfaces. Dazu `favicon-32.png`, `apple-touch-icon.png` (180 × 180) und `icon-512.png` (Manifest, maskierbar). Das alte `icon.svg` entfällt.
