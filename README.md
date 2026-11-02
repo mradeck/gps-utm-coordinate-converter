@@ -1,11 +1,11 @@
 # GPS2UTM Koordinaten
 
-**Aktuelle Version:** v26.4.1 (Änderungen: [`CHANGELOG.md`](CHANGELOG.md))
+**Aktuelle Version:** v26.5.3 (Änderungen: [`CHANGELOG.md`](CHANGELOG.md))
 
 ## Versionierung
 
 GPS2UTM verwendet wie alle öffentlichen Apps von Michael Radeck das Schema
-`Jahr.Push.Iteration`, angezeigt als `vJJ.P.I` (z. B. `v26.4.1`):
+`Jahr.Push.Iteration`, angezeigt als `vJJ.P.I` (z. B. `v26.5.1`):
 
 - `Jahr` – zweistellige Jahreszahl,
 - `Push` – laufende Zahl der GitHub-Pushes auf `main` im jeweiligen Jahr,
@@ -28,9 +28,19 @@ Handy-Standorts:
 - GCG2016-Geoidundulation und DHHN2016-Normalhöhe
 - eingebauter amtlicher Kontrollpunkt Lübben zur numerischen Prüfung
 - Offlinebetrieb als Progressive Web App
+- Kopfleiste im Stil des Geodata Inspector & Cleaner, von links nach rechts: „Über“ (Menü mit „Über mich“ und „Copyright“), Hilfe „(i)“ (Kurzanleitung als Dialog), Interface-Knopf und Sprachknopf
 - Oberfläche auf Deutsch und Englisch (Knopf mit Fahne, Wahl wird im Browser gespeichert, beim ersten Aufruf gilt die Browsersprache)
 - Interface automatisch / hell / dunkel (Knopf, Wahl wird im Browser gespeichert; „automatisch“ folgt der Systemeinstellung)
 - zwei Fußleisten: „Weitere Apps“ mit Links zu den übrigen Werkzeugen von Michael Radeck sowie Version, Datenquellen, Quellcode, Hilfe / Bugreport / Kontakt, Lizenzen / Copyright, Impressum und Ko-fi
+
+## Schrift
+
+Die Oberfläche nutzt die Schrift [Inter](https://github.com/rsms/inter)
+(© The Inter Project Authors, SIL Open Font License 1.1). Sie liegt als
+WOFF2-Datei aus `@fontsource-variable/inter` 5.3.0 (Unicode-Bereiche latin und
+latin-ext, variable Strichstärke) in `vendor/fonts/`, zusammen mit dem
+Lizenztext `vendor/fonts/OFL.txt`, und gehört zum Offline-Cache. Es gibt keine
+Anfragen an Google Fonts oder andere Schrift-CDNs.
 
 ## Benutzung
 
@@ -78,4 +88,5 @@ Weitere Angaben stehen in [`data/README.md`](data/README.md).
 
 Der Quellcode dieser App steht unter der [MIT-Lizenz](LICENSE),
 Copyright (c) 2026 Michael Radeck. Für die GCG2016-Daten gelten die oben
-genannten Bedingungen des BKG (CC BY 4.0).
+genannten Bedingungen des BKG (CC BY 4.0), für die Schrift Inter die SIL Open
+Font License 1.1.

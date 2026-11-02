@@ -8,7 +8,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=26.5.3" type="image/svg+xml">
+  <link rel="icon" href="favicon-32.png?v=26.5.3" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=26.5.3" sizes="180x180">
   <title>GPS2UTM — Koordinaten</title>
   <script>
     // Interface-Farbe und Sprache vor dem ersten Zeichnen setzen (kein Aufblitzen).
@@ -40,51 +42,76 @@
         --text:#1b2430; --muted:#5d6a79; --accent:#1f6fd1; --on-accent:#ffffff; --ok:#23824f; --warn:#a86400; --err:#c0392b;
       }
     }
+    /* Schrift: Inter, selbst gehostet (SIL OFL 1.1, vendor/fonts/OFL.txt) */
+    @font-face { font-family:"Inter Variable"; font-style:normal; font-display:swap; font-weight:100 900; src:url(vendor/fonts/inter-latin-ext-wght-normal.woff2) format("woff2-variations"), url(vendor/fonts/inter-latin-ext-wght-normal.woff2) format("woff2"); unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+    @font-face { font-family:"Inter Variable"; font-style:normal; font-display:swap; font-weight:100 900; src:url(vendor/fonts/inter-latin-wght-normal.woff2) format("woff2-variations"), url(vendor/fonts/inter-latin-wght-normal.woff2) format("woff2"); unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+    :root { --font-ui:"Inter Variable","Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --font-mono:ui-monospace,SFMono-Regular,Menlo,monospace; --accent-soft:color-mix(in srgb,var(--accent) 12%,transparent); }
     * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--text); font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    main { width:min(760px,100%); margin:0 auto; padding:max(18px,env(safe-area-inset-top)) 16px 28px; flex:1 0 auto; }
-    header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:18px; }
-    h1 { margin:0; font-size:clamp(1.45rem,7vw,2.15rem); line-height:1.08; }
-    .brand { display:inline-flex; align-items:baseline; letter-spacing:-.045em; font-weight:900; }
-    .brand-gps { color:var(--text); }
-    .brand-two { color:var(--err); padding:0 .035em; }
-    .brand-utm { color:var(--accent); }
-    .brand-version { margin-left:.45rem; color:var(--muted); font-size:.34em; font-weight:500; letter-spacing:0; white-space:nowrap; }
-    header p { margin:.45rem 0 0; color:var(--muted); }
-    button { font:inherit; }
-    .top-actions { display:flex; gap:6px; flex:0 0 auto; }
-    .icon-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:44px; height:44px; padding:0 10px; border:1px solid var(--border); border-radius:10px; background:var(--panel2); color:var(--text); cursor:pointer; font-size:.85rem; font-weight:600; }
-    .icon-btn:hover { border-color:var(--accent); }
-    .icon-btn svg { display:block; }
-    .flag { width:21px; height:14px; border-radius:2px; box-shadow:0 0 0 1px rgba(0,0,0,.25); }
+    body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--bg); color:var(--text); font:15px/1.5 var(--font-ui); font-synthesis:none; -webkit-font-smoothing:antialiased; }
+    button, input { font-family:var(--font-ui); }
+    main { width:min(760px,100%); margin:0 auto; padding:22px 16px 28px; flex:1 0 auto; }
+
+    /* Kopfleiste (Vorlage: Geodata Inspector & Cleaner) */
+    .topbar { position:sticky; top:0; z-index:50; border-bottom:1px solid var(--border); background:color-mix(in srgb,var(--bg) 90%,transparent); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); padding-top:env(safe-area-inset-top); }
+    .topbar-inner { display:flex; align-items:center; gap:16px; width:min(1080px,100%); min-height:64px; margin:0 auto; padding:10px max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left)); }
+    .brand { display:flex; align-items:center; gap:12px; min-width:0; margin-right:auto; color:var(--text); text-decoration:none; }
+    .brand-mark { flex:0 0 auto; display:grid; place-items:center; width:34px; height:34px; border:1px solid color-mix(in srgb,var(--accent) 50%,transparent); border-radius:9px; color:var(--accent); }
+    .brand-mark svg { display:block; width:22px; height:22px; }
+    .brand-copy { min-width:0; }
+    .brand-title-line { display:flex; align-items:baseline; gap:7px; white-space:nowrap; }
+    .brand strong { display:block; font-size:15px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; }
+    .brand-two { color:var(--err); }
+    .brand-version { color:var(--muted); font-size:9px; font-weight:450; letter-spacing:0; white-space:nowrap; }
+    .brand small { display:block; margin-top:2px; color:var(--accent); font-size:11px; letter-spacing:.16em; text-transform:uppercase; }
+    .top-actions { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+    .button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; border:1px solid var(--border); border-radius:8px; padding:8px 13px; background:transparent; color:var(--text); font:inherit; font-size:12px; line-height:1.2; text-decoration:none; cursor:pointer; transition:.2s ease; }
+    .button:hover { border-color:color-mix(in srgb,var(--accent) 45%,transparent); color:var(--accent); }
+    .button svg { display:block; }
+    .icon-button { min-width:38px; padding-inline:9px; }
+    .theme-button { min-width:39px; padding-inline:10px; }
+    .language-button { min-width:67px; font-family:var(--font-mono); }
+    .flag { display:block; width:21px; height:14px; border-radius:1px; box-shadow:0 0 0 1px var(--border); }
+    .header-menu { position:relative; }
+    .header-menu summary { list-style:none; user-select:none; }
+    .header-menu summary::-webkit-details-marker { display:none; }
+    .header-menu[open] summary { color:var(--accent); border-color:color-mix(in srgb,var(--accent) 45%,transparent); background:var(--accent-soft); }
+    .header-menu-panel { position:absolute; top:calc(100% + 7px); left:0; z-index:60; min-width:150px; display:grid; gap:4px; padding:6px; border:1px solid var(--border); border-radius:9px; background:var(--panel); box-shadow:0 14px 35px rgba(0,0,0,.34); }
+    .header-menu-panel button { width:100%; padding:9px 10px; border:0; border-radius:6px; background:transparent; color:var(--text); font:inherit; font-size:12px; text-align:left; cursor:pointer; }
+    .header-menu-panel button:hover, .header-menu-panel button:focus-visible { color:var(--accent); background:var(--accent-soft); outline:none; }
     :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+    /* Inhalt */
+    .eyebrow { margin:0 0 10px; color:var(--accent); font-size:9px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; }
+    .intro { margin:0 0 16px; color:var(--muted); font-size:14px; }
     .actions { display:grid; grid-template-columns:1fr auto; gap:10px; margin-bottom:14px; }
-    .primary { min-height:52px; border:0; border-radius:10px; padding:0 18px; background:var(--accent); color:var(--on-accent); font-weight:800; cursor:pointer; }
-    .secondary { min-height:52px; border:1px solid var(--border); border-radius:10px; padding:0 14px; background:var(--panel); color:var(--text); cursor:pointer; }
-    .secondary:hover, .mini:hover { border-color:var(--accent); }
-    .status { display:flex; gap:9px; align-items:center; min-height:44px; padding:10px 12px; margin-bottom:14px; border:1px solid var(--border); border-radius:10px; background:var(--panel2); color:var(--muted); }
-    .dot { width:10px; height:10px; border-radius:50%; background:var(--muted); flex:0 0 auto; }
-    .status.live .dot { background:var(--ok); box-shadow:0 0 0 5px color-mix(in srgb,var(--ok) 18%,transparent); }
+    .primary { min-height:50px; border:1px solid var(--accent); border-radius:8px; padding:0 18px; background:var(--accent); color:var(--on-accent); font-size:15px; font-weight:650; letter-spacing:.01em; cursor:pointer; transition:.2s ease; }
+    .primary:hover { filter:brightness(1.08); }
+    .secondary { min-height:50px; border:1px solid var(--border); border-radius:8px; padding:0 14px; background:transparent; color:var(--text); font-size:13px; cursor:pointer; transition:.2s ease; }
+    .secondary:hover, .mini:hover { border-color:color-mix(in srgb,var(--accent) 45%,transparent); color:var(--accent); }
+    .status { display:flex; gap:9px; align-items:center; min-height:42px; padding:10px 12px; margin-bottom:14px; border:1px solid var(--border); border-radius:999px; background:var(--panel); color:var(--muted); font-size:12px; letter-spacing:.02em; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--muted); flex:0 0 auto; }
+    .status.live .dot { background:var(--ok); box-shadow:0 0 10px var(--ok); }
     .grid { display:grid; gap:12px; }
-    .card { padding:16px; background:var(--panel); border:1px solid var(--border); border-radius:10px; }
-    .card h2 { margin:0 0 12px; font-size:.82rem; color:var(--accent); letter-spacing:.08em; text-transform:uppercase; }
-    .big { font-size:clamp(1.28rem,5.7vw,1.8rem); font-weight:800; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
-    .big + .big { margin-top:3px; }
-    .meta { margin-top:8px; color:var(--muted); font-size:.9rem; }
+    .card { padding:16px 18px; background:var(--panel); border:1px solid var(--border); border-radius:12px; }
+    .card h2 { margin:0 0 12px; color:var(--accent); font-size:9px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; }
+    .big { font-size:clamp(1.25rem,5.6vw,1.75rem); font-weight:650; letter-spacing:-.01em; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
+    .big + .big { margin-top:2px; }
+    .meta { margin-top:8px; color:var(--muted); font-size:12px; line-height:1.6; }
     .rows { display:grid; gap:0; }
-    .row { display:grid; grid-template-columns:minmax(105px,.8fr) minmax(0,1.4fr); gap:12px; padding:10px 0; border-top:1px solid var(--border); }
+    .row { display:grid; grid-template-columns:minmax(105px,.8fr) minmax(0,1.4fr); gap:12px; padding:9px 0; border-top:1px solid var(--border); font-size:14px; }
     .row:first-child { border-top:0; padding-top:0; }
     .label { color:var(--muted); }
     .value { text-align:right; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-    .copy { cursor:pointer; color:var(--accent); background:transparent; border:0; padding:0; text-align:right; }
-    details { margin-top:12px; }
-    summary { color:var(--accent); cursor:pointer; }
+    .copy { cursor:pointer; color:var(--accent); background:transparent; border:0; padding:0; text-align:right; font:inherit; }
+    main details { margin-top:12px; }
+    main summary { color:var(--accent); cursor:pointer; font-size:14px; }
     .notice { border-left:3px solid var(--warn); }
-    .notice p { margin:.4rem 0 0; color:var(--muted); font-size:.9rem; }
+    .notice p { margin:.4rem 0 0; color:var(--muted); font-size:13px; }
     .manual { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; margin-top:12px; }
-    input { width:100%; min-width:0; border:1px solid var(--border); border-radius:8px; padding:10px; background:var(--panel2); color:var(--text); font:inherit; }
-    .mini { border:1px solid var(--border); border-radius:8px; background:var(--panel2); color:var(--text); padding:0 12px; cursor:pointer; }
-    .disclaimer { margin:16px 2px 0; color:var(--muted); font-size:.8rem; }
+    input { width:100%; min-width:0; border:1px solid var(--border); border-radius:7px; padding:10px; background:var(--bg); color:var(--text); font-size:16px; }
+    input:focus { border-color:color-mix(in srgb,var(--accent) 55%,transparent); outline:none; box-shadow:0 0 0 3px var(--accent-soft); }
+    .mini { border:1px solid var(--border); border-radius:8px; background:transparent; color:var(--text); padding:0 14px; font-size:13px; cursor:pointer; transition:.2s ease; }
+    .disclaimer { margin:16px 2px 0; color:var(--muted); font-size:12px; line-height:1.6; }
     .hidden { display:none !important; }
 
     /* Fußleisten */
@@ -95,39 +122,84 @@
     .footer-meta { justify-content:space-between; padding:7px 16px; border-top:1px solid var(--border); color:var(--muted); }
     .related-apps a, .footer-links a, .footer-links button {
       display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border:1px solid var(--border); border-radius:20px;
-      background:var(--panel2); color:var(--muted); font:inherit; font-size:11px; line-height:1.5; text-decoration:none; cursor:pointer;
+      background:var(--panel2); color:var(--muted); font:inherit; font-size:11px; line-height:1.5; text-decoration:none; cursor:pointer; transition:.2s ease;
     }
-    .app-footer a:hover, .app-footer button:hover { border-color:var(--accent); color:var(--text); }
+    .app-footer a:hover, .app-footer button:hover { border-color:color-mix(in srgb,var(--accent) 45%,transparent); color:var(--accent); }
 
-    /* Dialoge */
-    dialog { padding:0; border:1px solid var(--border); border-radius:12px; background:var(--panel); color:var(--text); width:min(640px,calc(100vw - 32px)); max-height:calc(100vh - 48px); }
-    dialog::backdrop { background:rgba(0,0,0,.55); }
-    .dlg-head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; border-bottom:1px solid var(--border); }
-    .dlg-head h2 { margin:0; font-size:17px; }
-    .dlg-head button, .btn { background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font:inherit; font-size:14px; cursor:pointer; text-decoration:none; }
-    .dlg-head button:hover, .btn:hover { border-color:var(--accent); }
-    .dlg-body { padding:14px 18px 18px; font-size:14px; }
+    /* Dialoge (Stil der Über-/Copyright-Fenster des Cleaners) */
+    dialog { padding:0; border:1px solid var(--border); border-radius:16px; background:var(--panel); color:var(--text); width:min(720px,calc(100vw - 32px)); max-height:calc(100dvh - 48px); box-shadow:0 30px 90px rgba(0,0,0,.45); }
+    dialog::backdrop { background:rgba(0,0,0,.6); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+    .dlg-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:22px 24px 18px; border-bottom:1px solid var(--border); }
+    .dlg-head .eyebrow { margin-bottom:8px; }
+    .dlg-head h2 { margin:0; font-size:22px; font-weight:600; line-height:1.2; }
+    .dlg-head p.sub { margin:7px 0 0; color:var(--muted); font-size:12px; }
+    .dlg-head form { margin:0; }
+    .close-icon { flex:0 0 auto; width:35px; height:35px; min-height:0; padding:0; font-size:21px; line-height:1; }
+    .dlg-body { padding:20px 24px 18px; font-size:13px; }
+    .dlg-body > p, .dlg-body li { color:var(--muted); line-height:1.7; }
+    .dlg-body > p { margin:0 0 14px; }
+    .dlg-body h3 { margin:18px 0 6px; color:var(--accent); font-size:9px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; }
+    .dlg-body h3:first-child { margin-top:0; }
+    .dlg-body ul { margin:0 0 6px; padding-left:18px; }
     .dlg-body .actions { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
     .dlg-body .addr { color:var(--accent); font-weight:600; }
     .dlg-body .muted { color:var(--muted); }
-    .dlg-body table { width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
-    .dlg-body th, .dlg-body td { text-align:left; padding:4px 6px; border-bottom:1px solid var(--border); vertical-align:top; }
+    .dlg-body table { width:100%; border-collapse:collapse; font-size:12px; margin-top:6px; }
+    .dlg-body th, .dlg-body td { text-align:left; padding:6px 6px; border-bottom:1px solid var(--border); vertical-align:top; }
     .dlg-body th { color:var(--muted); font-weight:500; width:38%; }
     .dlg-body a { color:var(--accent); }
+    .dlg-body a.button { color:var(--text); }
+    .dlg-body a.button:hover { color:var(--accent); }
+    .inline-link { font-weight:650; text-underline-offset:3px; }
+    .about-links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:20px; }
+    .about-links a { overflow:hidden; padding:10px 12px; border:1px solid var(--border); border-radius:8px; color:var(--accent); background:var(--accent-soft); font-size:11px; text-align:center; text-decoration:none; text-overflow:ellipsis; white-space:nowrap; }
+    .about-links a:hover { border-color:var(--accent); }
+    .dlg-foot { display:flex; justify-content:flex-end; padding:4px 24px 22px; }
+    .dlg-foot .button { min-width:90px; color:var(--accent); border-color:color-mix(in srgb,var(--accent) 42%,transparent); }
 
     @media (min-width:680px) { .grid { grid-template-columns:1fr 1fr; } .wide { grid-column:1/-1; } }
+    @media (max-width:560px) {
+      .topbar-inner { flex-wrap:wrap; gap:8px 12px; min-height:0; }
+      .brand { flex:1 1 100%; }
+      .top-actions { flex:1 1 100%; justify-content:flex-start; }
+      .top-actions .button { min-height:40px; }
+      .header-menu-panel { left:0; right:auto; }
+      main { padding-top:18px; }
+      .dlg-head, .dlg-body { padding-left:18px; padding-right:18px; }
+      .dlg-foot { padding-right:18px; }
+      .about-links { grid-template-columns:1fr; }
+    }
     @media (max-width:390px) { .actions { grid-template-columns:1fr; } .secondary { min-height:44px; } .manual { grid-template-columns:1fr 1fr; } .manual button { grid-column:1/-1; min-height:42px; } .row { grid-template-columns:1fr; gap:2px; } .value,.copy { text-align:left; } }
   </style>
 </head>
 <body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="./" aria-label="GPS2UTM">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="11" r="6.5"/><circle cx="12" cy="11" r="2" fill="currentColor" stroke="none"/><path d="M12 1.8v3.2M12 17v2.4M2.8 11H6M18 11h3.2"/><path d="m9.6 19.4 2.4 3 2.4-3" stroke-linejoin="round"/></svg></span>
+      <span class="brand-copy">
+        <span class="brand-title-line"><strong>GPS<span class="brand-two">2</span>UTM</strong><span class="brand-version app-version"></span></span>
+        <small data-i18n="app.title"></small>
+      </span>
+    </a>
+    <nav class="top-actions" data-i18n-aria-label="header.actionsAria">
+      <details id="about-menu" class="header-menu">
+        <summary class="button button-quiet" data-i18n="header.aboutMenu"></summary>
+        <div class="header-menu-panel">
+          <button id="open-about" type="button" data-i18n="header.about"></button>
+          <button id="open-copyright" type="button" data-i18n="header.copyright"></button>
+        </div>
+      </details>
+      <button id="btn-help" class="button button-quiet icon-button" type="button" data-i18n-aria-label="header.help" data-i18n-title="header.help"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+      <button id="btn-theme" class="button button-quiet theme-button" type="button"></button>
+      <button id="btn-lang" class="button button-quiet language-button" type="button"></button>
+    </nav>
+  </div>
+</header>
+
 <main>
-  <header>
-    <div><h1 class="brand" aria-label="GPS2UTM"><span class="brand-gps">GPS</span><span class="brand-two">2</span><span class="brand-utm">UTM</span><sup class="brand-version app-version"></sup></h1><p data-i18n="app.tagline"></p></div>
-    <div class="top-actions">
-      <button id="btn-theme" class="icon-btn" type="button"></button>
-      <button id="btn-lang" class="icon-btn" type="button"></button>
-    </div>
-  </header>
+  <p class="eyebrow" data-i18n="intro.eyebrow"></p>
+  <p class="intro" data-i18n="app.tagline"></p>
 
   <div class="actions">
     <button id="gps" class="primary" type="button"></button>
@@ -189,8 +261,8 @@
     <strong data-i18n="footer.apps"></strong>
     <a href="https://geodata-inspector-cleaner.netlify.app/" target="_blank" rel="noopener noreferrer">Geodata Inspector &amp; Cleaner <span aria-hidden="true">↗</span></a>
     <a href="https://mradeck.github.io/geotiff-inspector/" target="_blank" rel="noopener noreferrer">GeoTIFF Inspector <span aria-hidden="true">↗</span></a>
-    <a href="https://measuremap-viewer-editor-emlid.netlify.app/" target="_blank" rel="noopener noreferrer">MeasureMap <span aria-hidden="true">↗</span></a>
-    <a href="https://geoid-forge.netlify.app/" target="_blank" rel="noopener noreferrer">Geoid Forge <span aria-hidden="true">↗</span></a>
+    <a href="https://measuremap-viewer-editor.netlify.app/" target="_blank" rel="noopener noreferrer">MeasureMap <span aria-hidden="true">↗</span></a>
+    <a href="https://geoid-tiff2pgm-converter.netlify.app/" target="_blank" rel="noopener noreferrer">Geoid-TIFF 2 PGM Converter <span aria-hidden="true">↗</span></a>
     <a href="https://dxf-coordinate-forge.netlify.app/" target="_blank" rel="noopener noreferrer">DXF Coordinate Forge <span aria-hidden="true">↗</span></a>
     <a href="https://www.pointcloud-manager.com" target="_blank" rel="noopener noreferrer">PointCloud Manager <span aria-hidden="true">↗</span></a>
     <a href="https://skycheck-de.netlify.app/" target="_blank" rel="noopener noreferrer">SkyCheck <span aria-hidden="true">↗</span></a>
@@ -211,13 +283,13 @@
 </footer>
 
 <dialog id="support-dialog" aria-labelledby="support-title">
-  <div class="dlg-head"><h2 id="support-title" data-i18n="footer.support"></h2><form method="dialog"><button type="submit" data-i18n-aria-label="dialog.close">×</button></form></div>
+  <div class="dlg-head"><div><p class="eyebrow">GPS / UTM Converter</p><h2 id="support-title" data-i18n="footer.support"></h2></div><form method="dialog"><button class="button close-icon" type="submit" data-i18n-aria-label="dialog.close">×</button></form></div>
   <div class="dlg-body">
     <p data-i18n="support.intro"></p>
     <div class="actions">
-      <a id="support-help" class="btn" href="https://github.com/mradeck/gps-utm-coordinate-converter#readme" target="_blank" rel="noopener noreferrer" data-i18n="support.help"></a>
-      <a id="support-bugreport" class="btn" href="mailto:michael.radeck@email.de" data-i18n="support.bugreport"></a>
-      <a id="support-contact" class="btn" href="mailto:michael.radeck@email.de" data-i18n="support.contact"></a>
+      <a id="support-help" class="button" href="https://github.com/mradeck/gps-utm-coordinate-converter#readme" target="_blank" rel="noopener noreferrer" data-i18n="support.help"></a>
+      <a id="support-bugreport" class="button" href="mailto:michael.radeck@email.de" data-i18n="support.bugreport"></a>
+      <a id="support-contact" class="button" href="mailto:michael.radeck@email.de" data-i18n="support.contact"></a>
     </div>
     <p class="addr">michael.radeck@email.de</p>
     <p data-i18n="support.bugHint"></p>
@@ -226,23 +298,65 @@
 </dialog>
 
 <dialog id="licenses-dialog" aria-labelledby="licenses-title">
-  <div class="dlg-head"><h2 id="licenses-title" data-i18n="footer.licenses"></h2><form method="dialog"><button type="submit" data-i18n-aria-label="dialog.close">×</button></form></div>
+  <div class="dlg-head"><div><p class="eyebrow" data-i18n="copyright.eyebrow"></p><h2 id="licenses-title" data-i18n="copyright.title"></h2><p class="sub" data-i18n="copyright.subtitle"></p></div><form method="dialog"><button class="button close-icon" type="submit" data-i18n-aria-label="dialog.close">×</button></form></div>
   <div class="dlg-body">
     <p data-i18n="lic.intro"></p>
     <table>
       <tr><th data-i18n="lic.component"></th><td><b data-i18n="lic.license"></b> · <span data-i18n="lic.use"></span></td></tr>
       <tr><th data-i18n="lic.app"></th><td><a href="https://github.com/mradeck/gps-utm-coordinate-converter/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT</a> © Michael Radeck · <span data-i18n="lic.appUse"></span></td></tr>
+      <tr><th data-i18n="lic.font"></th><td><a href="https://github.com/rsms/inter" target="_blank" rel="noopener noreferrer">Inter</a> (@fontsource-variable/inter 5.3.0) · <a href="vendor/fonts/OFL.txt" target="_blank" rel="noopener">SIL OFL 1.1</a> · © The Inter Project Authors · <span data-i18n="lic.fontUse"></span></td></tr>
       <tr><th>GCG2016 (BKG)</th><td><a href="https://creativecommons.org/licenses/by/4.0/deed.de" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> · <span data-i18n="lic.gcgHolder"></span> · <span data-i18n="lic.gcg"></span></td></tr>
       <tr><th data-i18n="lic.transform"></th><td><a href="https://gdz.bkg.bund.de/koordinatentransformation" target="_blank" rel="noopener noreferrer">BKG</a> · <span data-i18n="lic.transformUse"></span></td></tr>
     </table>
   </div>
+  <div class="dlg-foot"><form method="dialog"><button class="button" type="submit" data-i18n="about.close"></button></form></div>
 </dialog>
 
-<script src="i18n.js?v=26.4.1"></script>
-<script src="coordinate-tools.js?v=26.4.1"></script>
+<dialog id="about-dialog" aria-labelledby="about-title">
+  <div class="dlg-head"><div><p class="eyebrow" data-i18n="about.eyebrow"></p><h2 id="about-title" data-i18n="about.title"></h2><p class="sub" data-i18n="about.subtitle"></p></div><form method="dialog"><button class="button close-icon" type="submit" data-i18n-aria-label="about.closeAria">×</button></form></div>
+  <div class="dlg-body">
+    <p data-i18n="about.p1"></p>
+    <p data-i18n="about.p2"></p>
+    <p><span data-i18n="about.p3"></span> <span data-i18n="about.pointcloudDemoIntro"></span> <a class="inline-link" href="https://stable-v53--pointcloud-manager.netlify.app/" target="_blank" rel="noopener" data-i18n="about.pointcloudDemoLink"></a>.</p>
+    <p data-i18n="about.p4"></p>
+    <nav class="about-links" data-i18n-aria-label="about.linksAria">
+      <a href="https://multikopterschule.de/" target="_blank" rel="noopener">multikopterschule.de</a>
+      <a href="https://www.dronemedia-munich.de/" target="_blank" rel="noopener">dronemedia-munich.de</a>
+      <a href="https://www.xing.com/profile/Michael_Radeck" target="_blank" rel="noopener" data-i18n="about.link.xing"></a>
+      <a href="https://www.crew-united.com/de/Michael-Radeck_71557.html" target="_blank" rel="noopener">Crew United</a>
+    </nav>
+  </div>
+  <div class="dlg-foot"><form method="dialog"><button class="button" type="submit" data-i18n="about.close"></button></form></div>
+</dialog>
+
+<dialog id="help-dialog" aria-labelledby="help-title">
+  <div class="dlg-head"><div><p class="eyebrow" data-i18n="help.eyebrow"></p><h2 id="help-title" data-i18n="help.title"></h2><p class="sub" data-i18n="help.subtitle"></p></div><form method="dialog"><button class="button close-icon" type="submit" data-i18n-aria-label="help.closeAria">×</button></form></div>
+  <div class="dlg-body">
+    <h3 data-i18n="help.use.h"></h3>
+    <ul>
+      <li data-i18n="help.use.gps"></li>
+      <li data-i18n="help.use.ref"></li>
+      <li data-i18n="help.use.manual"></li>
+      <li data-i18n="help.use.copy"></li>
+    </ul>
+    <h3 data-i18n="help.acc.h"></h3>
+    <p data-i18n="help.acc.p1"></p>
+    <p data-i18n="help.acc.p2"></p>
+    <h3 data-i18n="help.offline.h"></h3>
+    <p data-i18n="help.offline.p"></p>
+    <div class="actions">
+      <button id="help-support" class="button" type="button" data-i18n="help.support"></button>
+      <a class="button" href="https://github.com/mradeck/gps-utm-coordinate-converter#readme" target="_blank" rel="noopener noreferrer" data-i18n="help.readme"></a>
+    </div>
+  </div>
+  <div class="dlg-foot"><form method="dialog"><button class="button" type="submit" data-i18n="about.close"></button></form></div>
+</dialog>
+
+<script src="i18n.js?v=26.5.3"></script>
+<script src="coordinate-tools.js?v=26.5.3"></script>
 <script>
   'use strict';
-  const APP_VERSION = '26.4.1';
+  const APP_VERSION = '26.5.3';
   const APP_VERSION_CODE = `v${APP_VERSION}`;
   const { t } = window.I18N;
   const REF = { lat: 51 + 56 / 60 + 31.768 / 3600, lon: 13 + 53 / 60 + 46.094 / 3600, altitude: 94.04 };
@@ -294,6 +408,7 @@
     document.querySelectorAll('[data-i18n]').forEach(n => { n.textContent = t(n.dataset.i18n); });
     document.querySelectorAll('[data-i18n-aria-label]').forEach(n => n.setAttribute('aria-label', t(n.dataset.i18nAriaLabel)));
     document.querySelectorAll('[data-i18n-placeholder]').forEach(n => n.setAttribute('placeholder', t(n.dataset.i18nPlaceholder)));
+    document.querySelectorAll('[data-i18n-title]').forEach(n => n.setAttribute('title', t(n.dataset.i18nTitle)));
     const btn = $('btn-lang');
     btn.innerHTML = `${lang === 'de' ? FLAG_DE : FLAG_GB}<span>${lang.toUpperCase()}</span>`;
     btn.title = t('lang.toggle'); btn.setAttribute('aria-label', t('lang.toggle'));
@@ -319,6 +434,19 @@
   $('footer-year').textContent = String(new Date().getFullYear());
   $('footer-support').addEventListener('click', () => $('support-dialog').showModal());
   $('footer-licenses').addEventListener('click', () => $('licenses-dialog').showModal());
+
+  // Kopfleiste: Über-Menü (Über mich, Copyright) und Hilfe
+  const aboutMenu = $('about-menu');
+  const closeAboutMenu = () => { aboutMenu.open = false; };
+  const openFromMenu = id => { closeAboutMenu(); $(id).showModal(); };
+  $('open-about').addEventListener('click', () => openFromMenu('about-dialog'));
+  $('open-copyright').addEventListener('click', () => openFromMenu('licenses-dialog'));
+  document.addEventListener('click', e => { if (aboutMenu.open && !aboutMenu.contains(e.target)) closeAboutMenu(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && aboutMenu.open) { closeAboutMenu(); aboutMenu.querySelector('summary').focus(); } });
+  $('btn-help').addEventListener('click', () => $('help-dialog').showModal());
+  $('help-support').addEventListener('click', () => { $('help-dialog').close(); $('support-dialog').showModal(); });
+  // Klick auf den abgedunkelten Hintergrund schließt ein Dialogfenster.
+  document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));
 
   // -------------------------------------------------------------------------
   // Umrechnung und Anzeige
@@ -399,8 +527,10 @@
 
   $('reference').addEventListener('click', () => { setStatus('status.reference'); renderPosition(REF.lat, REF.lon, { altitude:REF.altitude, reference:true }).catch(() => setStatus('status.invalid')); });
   $('manual-go').addEventListener('click', async () => {
-    const lat = Number(String($('manual-lat').value).replace(',', '.'));
-    const lon = Number(String($('manual-lon').value).replace(',', '.'));
+    // Leere Felder ergeben keine Koordinate (Number('') wäre 0).
+    const parse = v => (String(v).trim() === '' ? NaN : Number(String(v).trim().replace(',', '.')));
+    const lat = parse($('manual-lat').value);
+    const lon = parse($('manual-lon').value);
     // renderPosition ist async: ein ungültiger Wert wird als Rejection gemeldet,
     // nicht synchron geworfen. Deshalb mit await abfangen.
     try { await renderPosition(lat, lon); setStatus('status.manual'); } catch (_) { setStatus('status.invalid'); }
