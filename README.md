@@ -1,6 +1,6 @@
 # GPS2UTM Koordinaten
 
-**Aktuelle Version:** v26.5.1 (Änderungen: [`CHANGELOG.md`](CHANGELOG.md))
+**Aktuelle Version:** v26.5.2 (Änderungen: [`CHANGELOG.md`](CHANGELOG.md))
 
 ## Versionierung
 

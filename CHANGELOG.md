@@ -2,6 +2,13 @@
 
 Versionsschema `Jahr.Push.Iteration` (siehe README, Abschnitt „Versionierung“); ältere Einträge folgen dem früheren Schema `vYY.MM.major.subversion`.
 
+## v26.5.2 — 2026-11-02
+
+- Favicon neu und sichtbar: `favicon.svg` zeigt das Markenzeichen der Kopfleiste (Fadenkreuz mit Positionsmarke, Blau `#1f6fd1` auf Hellgrau, Rahmen mit Radius 9/34) in der Darstellung des hellen Interfaces. Dazu `favicon-32.png`, `apple-touch-icon.png` (180 × 180) und `icon-512.png` (Manifest, maskierbar). Das alte `icon.svg` entfällt.
+- Das bisherige Icon wich vom Markenzeichen ab: dunkler Hintergrund (`#14171c`), hellere Linien und ein grüner Punkt, wirkte also gegenüber der hellen Kopfleiste invertiert. Jetzt sind Favicon und Markenzeichen identisch. `index.html` verweist auf SVG, PNG und `apple-touch-icon` (mit `?v=` gegen veraltete Caches), Manifest und Offline-Cache führen die neuen Dateien.
+- Service-Worker-Cache `gps2utm-26.5.2`.
+- Sonst keine Änderungen an Design, Kopf- und Fußleisten oder Umrechnung.
+
 ## v26.5.1 — 2026-11-02
 
 - Erscheinungsbild an den Geodata Inspector & Cleaner angeglichen: Kopfleiste über die ganze Breite mit Markenzeichen, Titel „GPS2UTM“ in Großbuchstaben, Version und Unterzeile; Eyebrow-Überschriften, Karten, Knöpfe, Eingabefelder und Dialogfenster im Stil des Cleaners. Neutrales Farbschema (Grau/Blau) bleibt. Auf dem Handy rücken die Kopfleisten-Knöpfe in eine eigene Zeile unter den Titel.

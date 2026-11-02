@@ -1,11 +1,14 @@
-const CACHE = 'gps2utm-26.5.1';
+const CACHE = 'gps2utm-26.5.2';
 const SHELL = [
   './',
   './index.html',
   './i18n.js',
   './coordinate-tools.js',
   './data/gcg2016v2023-cm.i16',
-  './icon.svg',
+  './favicon.svg',
+  './favicon-32.png',
+  './apple-touch-icon.png',
+  './icon-512.png',
   './manifest.webmanifest',
   './vendor/fonts/inter-latin-wght-normal.woff2',
   './vendor/fonts/inter-latin-ext-wght-normal.woff2',
