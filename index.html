@@ -231,18 +231,18 @@
     <p data-i18n="lic.intro"></p>
     <table>
       <tr><th data-i18n="lic.component"></th><td><b data-i18n="lic.license"></b> · <span data-i18n="lic.use"></span></td></tr>
-      <tr><th data-i18n="lic.app"></th><td>© Michael Radeck · <span data-i18n="lic.appUse"></span></td></tr>
+      <tr><th data-i18n="lic.app"></th><td><a href="https://github.com/mradeck/gps-utm-coordinate-converter/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT</a> © Michael Radeck · <span data-i18n="lic.appUse"></span></td></tr>
       <tr><th>GCG2016 (BKG)</th><td><a href="https://creativecommons.org/licenses/by/4.0/deed.de" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> · <span data-i18n="lic.gcgHolder"></span> · <span data-i18n="lic.gcg"></span></td></tr>
       <tr><th data-i18n="lic.transform"></th><td><a href="https://gdz.bkg.bund.de/koordinatentransformation" target="_blank" rel="noopener noreferrer">BKG</a> · <span data-i18n="lic.transformUse"></span></td></tr>
     </table>
   </div>
 </dialog>
 
-<script src="i18n.js?v=26.11.4.0"></script>
-<script src="coordinate-tools.js?v=26.11.4.0"></script>
+<script src="i18n.js?v=26.4.1"></script>
+<script src="coordinate-tools.js?v=26.4.1"></script>
 <script>
   'use strict';
-  const APP_VERSION = '26.11.4.0';
+  const APP_VERSION = '26.4.1';
   const APP_VERSION_CODE = `v${APP_VERSION}`;
   const { t } = window.I18N;
   const REF = { lat: 51 + 56 / 60 + 31.768 / 3600, lon: 13 + 53 / 60 + 46.094 / 3600, altitude: 94.04 };
@@ -390,18 +390,20 @@
     watchId = navigator.geolocation.watchPosition(position => {
       const p = position.coords;
       setStatus('status.live', { timestamp: position.timestamp }, true);
-      renderPosition(p.latitude, p.longitude, { accuracy:p.accuracy, altitude:p.altitude, altitudeAccuracy:p.altitudeAccuracy });
+      renderPosition(p.latitude, p.longitude, { accuracy:p.accuracy, altitude:p.altitude, altitudeAccuracy:p.altitudeAccuracy }).catch(() => setStatus('status.invalid'));
     }, error => {
       setStatus(error.code === 1 ? 'status.denied' : 'status.unavailable');
       navigator.geolocation.clearWatch(watchId); watchId = null; $('gps').textContent = t('btn.gps');
     }, { enableHighAccuracy:true, maximumAge:1000, timeout:15000 });
   });
 
-  $('reference').addEventListener('click', () => { setStatus('status.reference'); renderPosition(REF.lat, REF.lon, { altitude:REF.altitude, reference:true }); });
-  $('manual-go').addEventListener('click', () => {
+  $('reference').addEventListener('click', () => { setStatus('status.reference'); renderPosition(REF.lat, REF.lon, { altitude:REF.altitude, reference:true }).catch(() => setStatus('status.invalid')); });
+  $('manual-go').addEventListener('click', async () => {
     const lat = Number(String($('manual-lat').value).replace(',', '.'));
     const lon = Number(String($('manual-lon').value).replace(',', '.'));
-    try { renderPosition(lat, lon); setStatus('status.manual'); } catch (_) { setStatus('status.invalid'); }
+    // renderPosition ist async: ein ungültiger Wert wird als Rejection gemeldet,
+    // nicht synchron geworfen. Deshalb mit await abfangen.
+    try { await renderPosition(lat, lon); setStatus('status.manual'); } catch (_) { setStatus('status.invalid'); }
   });
   $('copy-decimal').addEventListener('click', async e => { await navigator.clipboard?.writeText(e.currentTarget.dataset.copy || ''); setStatus('status.copied'); });
 
@@ -411,7 +413,7 @@
   const query = new URLSearchParams(location.search);
   if (query.has('lat') && query.has('lon')) {
     const lat = Number(query.get('lat')), lon = Number(query.get('lon'));
-    try { renderPosition(lat, lon); setStatus('status.query'); } catch (_) {}
+    renderPosition(lat, lon).then(() => setStatus('status.query'), () => setStatus('status.invalid'));
   }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>

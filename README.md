@@ -1,17 +1,23 @@
 # GPS2UTM Koordinaten
 
-**Aktuelle Version:** v26.11.4.0 (Änderungen: [`CHANGELOG.md`](CHANGELOG.md))
+**Aktuelle Version:** v26.4.1 (Änderungen: [`CHANGELOG.md`](CHANGELOG.md))
 
 ## Versionierung
 
-GPS2UTM verwendet wie der PointCloud Manager das Anzeigeformat
-`vYY.MM.major.subversion`. Die aktuelle fortlaufende App-Version bildet die
-`major`-Stelle; ein neuer Funktionsstand setzt `subversion` auf `0`, reine
-Hotfixes erhöhen nur die letzte Stelle. Die vollständige Nummer steht zentral
-in `APP_VERSION` und erscheint im Browser-Tab, neben der Wortmarke im
-App-Kopf, in der Fußleiste und im Betreff der Kontakt-Mails. Bei jeder neuen
-Version wird auch der Cache-Name in `sw.js` angepasst, damit installierte
-Fassungen die neuen Dateien laden.
+GPS2UTM verwendet wie alle öffentlichen Apps von Michael Radeck das Schema
+`Jahr.Push.Iteration`, angezeigt als `vJJ.P.I` (z. B. `v26.4.1`):
+
+- `Jahr` – zweistellige Jahreszahl,
+- `Push` – laufende Zahl der GitHub-Pushes auf `main` im jeweiligen Jahr,
+- `Iteration` – lokale Iteration seit dem letzten Push.
+
+Vor jedem Push wird der Push-Zähler erhöht und die Iteration auf `1` gesetzt;
+CHANGELOG und README werden dabei nachgezogen. Bis v26.11.4.0 (lokal) bzw.
+v26.08.3.0 (veröffentlicht) galt das Schema `vYY.MM.major.subversion`.
+Die vollständige Nummer steht zentral in `APP_VERSION` und erscheint im
+Browser-Tab, neben der Wortmarke im App-Kopf, in der Fußleiste und im Betreff
+der Kontakt-Mails. Bei jeder neuen Version wird auch der Cache-Name in `sw.js`
+angepasst, damit installierte Fassungen die neuen Dateien laden.
 
 Mobile, installierbare Single-Page-App zur direkten Umrechnung des
 Handy-Standorts:
@@ -67,3 +73,9 @@ Die Höhenumrechnung folgt `H_DHHN2016 = h_ETRS89 − ζ_GCG2016`.
 GCG2016 © GeoBasis-DE / BKG (2026),
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de).
 Weitere Angaben stehen in [`data/README.md`](data/README.md).
+
+## Lizenz
+
+Der Quellcode dieser App steht unter der [MIT-Lizenz](LICENSE),
+Copyright (c) 2026 Michael Radeck. Für die GCG2016-Daten gelten die oben
+genannten Bedingungen des BKG (CC BY 4.0).
